@@ -19,34 +19,34 @@ from pydantic import BaseModel, Field
 DEFAULT_CONTEXT_LINES = 3
 
 class GitStatus(BaseModel):
-    repo_path: str
+    directory_path: str
 
 class GitDiffUnstaged(BaseModel):
-    repo_path: str
+    directory_path: str
     context_lines: int = DEFAULT_CONTEXT_LINES
 
 class GitDiffStaged(BaseModel):
-    repo_path: str
+    directory_path: str
     context_lines: int = DEFAULT_CONTEXT_LINES
 
 class GitDiff(BaseModel):
-    repo_path: str
+    directory_path: str
     target: str
     context_lines: int = DEFAULT_CONTEXT_LINES
 
 class GitCommit(BaseModel):
-    repo_path: str
+    directory_path: str
     message: str
 
 class GitAdd(BaseModel):
-    repo_path: str
+    directory_path: str
     files: list[str]
 
 class GitReset(BaseModel):
-    repo_path: str
+    directory_path: str
 
 class GitLog(BaseModel):
-    repo_path: str
+    directory_path: str
     max_count: int = 10
     start_timestamp: Optional[str] = Field(
         None,
@@ -58,22 +58,22 @@ class GitLog(BaseModel):
     )
 
 class GitCreateBranch(BaseModel):
-    repo_path: str
+    directory_path: str
     branch_name: str
     base_branch: str | None = None
 
 class GitCheckout(BaseModel):
-    repo_path: str
+    directory_path: str
     branch_name: str
 
 class GitShow(BaseModel):
-    repo_path: str
+    directory_path: str
     revision: str
 
 
 
 class GitBranch(BaseModel):
-    repo_path: str = Field(
+    directory_path: str = Field(
         ...,
         description="The path to the Git repository.",
     )
@@ -247,68 +247,68 @@ async def serve(repository: Path | None) -> None:
     @server.list_tools()
     async def list_tools() -> list[Tool]:
         return [
-            Tool(
-                name=GitTools.STATUS,
-                description="Shows the working tree status",
-                inputSchema=GitStatus.model_json_schema(),
-            ),
-            Tool(
-                name=GitTools.DIFF_UNSTAGED,
-                description="Shows changes in the working directory that are not yet staged",
-                inputSchema=GitDiffUnstaged.model_json_schema(),
-            ),
+            # Tool(
+            #     name=GitTools.STATUS,
+            #     description="Shows the working tree status",
+            #     inputSchema=GitStatus.model_json_schema(),
+            # ),
+            # Tool(
+            #     name=GitTools.DIFF_UNSTAGED,
+            #     description="Shows changes in the working directory that are not yet staged",
+            #     inputSchema=GitDiffUnstaged.model_json_schema(),
+            # ),
             Tool(
                 name=GitTools.DIFF_STAGED,
                 description="Shows changes that are staged for commit",
                 inputSchema=GitDiffStaged.model_json_schema(),
-            ),
-            Tool(
-                name=GitTools.DIFF,
-                description="Shows differences between branches or commits",
-                inputSchema=GitDiff.model_json_schema(),
-            ),
-            Tool(
-                name=GitTools.COMMIT,
-                description="Records changes to the repository",
-                inputSchema=GitCommit.model_json_schema(),
-            ),
-            Tool(
-                name=GitTools.ADD,
-                description="Adds file contents to the staging area",
-                inputSchema=GitAdd.model_json_schema(),
-            ),
-            Tool(
-                name=GitTools.RESET,
-                description="Unstages all staged changes",
-                inputSchema=GitReset.model_json_schema(),
-            ),
-            Tool(
-                name=GitTools.LOG,
-                description="Shows the commit logs",
-                inputSchema=GitLog.model_json_schema(),
-            ),
-            Tool(
-                name=GitTools.CREATE_BRANCH,
-                description="Creates a new branch from an optional base branch",
-                inputSchema=GitCreateBranch.model_json_schema(),
-            ),
-            Tool(
-                name=GitTools.CHECKOUT,
-                description="Switches branches",
-                inputSchema=GitCheckout.model_json_schema(),
-            ),
-            Tool(
-                name=GitTools.SHOW,
-                description="Shows the contents of a commit",
-                inputSchema=GitShow.model_json_schema(),
-            ),
-
-            Tool(
-                name=GitTools.BRANCH,
-                description="List Git branches",
-                inputSchema=GitBranch.model_json_schema(),
-
             )
+            # Tool(
+            #     name=GitTools.DIFF,
+            #     description="Shows differences between branches or commits",
+            #     inputSchema=GitDiff.model_json_schema(),
+            # ),
+            # Tool(
+            #     name=GitTools.COMMIT,
+            #     description="Records changes to the repository",
+            #     inputSchema=GitCommit.model_json_schema(),
+            # ),
+            # Tool(
+            #     name=GitTools.ADD,
+            #     description="Adds file contents to the staging area",
+            #     inputSchema=GitAdd.model_json_schema(),
+            # ),
+            # Tool(
+            #     name=GitTools.RESET,
+            #     description="Unstages all staged changes",
+            #     inputSchema=GitReset.model_json_schema(),
+            # ),
+            # Tool(
+            #     name=GitTools.LOG,
+            #     description="Shows the commit logs",
+            #     inputSchema=GitLog.model_json_schema(),
+            # ),
+            # Tool(
+            #     name=GitTools.CREATE_BRANCH,
+            #     description="Creates a new branch from an optional base branch",
+            #     inputSchema=GitCreateBranch.model_json_schema(),
+            # ),
+            # Tool(
+            #     name=GitTools.CHECKOUT,
+            #     description="Switches branches",
+            #     inputSchema=GitCheckout.model_json_schema(),
+            # ),
+            # Tool(
+            #     name=GitTools.SHOW,
+            #     description="Shows the contents of a commit",
+            #     inputSchema=GitShow.model_json_schema(),
+            # ),
+
+            # Tool(
+            #     name=GitTools.BRANCH,
+            #     description="List Git branches",
+            #     inputSchema=GitBranch.model_json_schema(),
+
+            # )
         ]
 
     async def list_repos() -> Sequence[str]:
@@ -342,10 +342,10 @@ async def serve(repository: Path | None) -> None:
 
     @server.call_tool()
     async def call_tool(name: str, arguments: dict) -> list[TextContent]:
-        repo_path = Path(arguments["repo_path"])
+        directory_path = Path(arguments["directory_path"])
         
         # For all commands, we need an existing repo
-        repo = git.Repo(repo_path)
+        repo = git.Repo(directory_path, search_parent_directories = True)
 
         match name:
             case GitTools.STATUS:
